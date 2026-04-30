@@ -1,0 +1,116 @@
+{
+  "created_at_utc": "2026-04-29T23:46:53.918878+00:00",
+  "subset": "lite",
+  "split": "test",
+  "example_count": 15,
+  "skipped": [
+    {
+      "issue_id": "astropy__astropy-12907",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "astropy__astropy-14995",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-10914",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-10924",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11001",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11019",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11049",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11283",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11422",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11564",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11583",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11620",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11630",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11742",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11815",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11848",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11910",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-11999",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-12113",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-12125",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-12284",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-12286",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-12453",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-12470",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-12589",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-12700",
+      "reason": "not enough usable distractor snippets"
+    },
+    {
+      "issue_id": "django__django-12708",
+      "reason": "not enough usable distractor snippets"
+    }
+  ]
+}
