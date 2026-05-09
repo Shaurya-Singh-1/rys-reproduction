@@ -1,0 +1,30 @@
+{
+  "generated_at_utc": "2026-05-09T22:42:56.839702+00:00",
+  "records_path": "results/localization_eval/baseline_16_20_40_44/records.jsonl",
+  "summary": [
+    {
+      "condition": "baseline",
+      "n": 7,
+      "top1_accuracy": 0.0,
+      "top3_accuracy": 0.42857142857142855,
+      "mrr": 0.2952380952380952,
+      "avg_rank": 3.7142857142857144
+    },
+    {
+      "condition": "rys_16_20",
+      "n": 7,
+      "top1_accuracy": 0.14285714285714285,
+      "top3_accuracy": 0.5714285714285714,
+      "mrr": 0.40238095238095234,
+      "avg_rank": 3.2857142857142856
+    },
+    {
+      "condition": "rys_40_44",
+      "n": 7,
+      "top1_accuracy": 0.0,
+      "top3_accuracy": 0.42857142857142855,
+      "mrr": 0.2952380952380952,
+      "avg_rank": 3.7142857142857144
+    }
+  ]
+}
