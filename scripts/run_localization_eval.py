@@ -131,7 +131,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block", action="append", default=[], help="RYS block like 16,20. Repeatable.")
     parser.add_argument("--condition", action="append", default=[], help="Custom NAME=SPEC. Repeatable.")
     parser.add_argument("--no-baseline", dest="include_baseline", action="store_false", default=True)
-    parser.add_argument("--limit-examples", type=int, default=None)
+    parser.add_argument("--start-index", type=int, default=0, help="0-based dataset index to start from.")
+    parser.add_argument("--num-examples", type=int, default=None, help="Number of examples to run from --start-index.")
+    parser.add_argument("--limit-examples", type=int, default=None, help="Legacy alias for --num-examples from index 0.")
     parser.add_argument("--max-new-tokens", type=int, default=256)
     parser.add_argument("--dtype", default="bfloat16")
     parser.add_argument("--attention-impl", default="sdpa", choices=["eager", "flash_attention_2", "sdpa"])
@@ -209,9 +211,24 @@ def main() -> None:
     records_path = output_dir / "records.jsonl"
     summary_path = output_dir / "summary.json"
 
-    examples = load_localization_dataset(Path(args.dataset))
+    all_examples = load_localization_dataset(Path(args.dataset))
+    if args.start_index < 0:
+        raise ValueError("--start-index must be >= 0")
+    if args.num_examples is not None and args.num_examples < 0:
+        raise ValueError("--num-examples must be >= 0")
+    if args.limit_examples is not None and args.limit_examples < 0:
+        raise ValueError("--limit-examples must be >= 0")
+    if args.limit_examples is not None and args.num_examples is not None:
+        raise ValueError("Use only one of --num-examples or --limit-examples.")
+
+    num_examples = args.num_examples
     if args.limit_examples is not None:
-        examples = examples[: args.limit_examples]
+        if args.start_index != 0:
+            raise ValueError("--limit-examples is a legacy alias from index 0; use --num-examples with --start-index.")
+        num_examples = args.limit_examples
+
+    end_index = None if num_examples is None else args.start_index + num_examples
+    examples = all_examples[args.start_index : end_index]
     if not examples:
         raise ValueError(f"No examples loaded from {args.dataset}")
 
@@ -240,6 +257,10 @@ def main() -> None:
     manifest = {
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "dataset": args.dataset,
+        "dataset_total_examples": len(all_examples),
+        "dataset_start_index": args.start_index,
+        "dataset_num_examples": len(examples),
+        "selected_issue_ids": [example.issue_id for example in examples],
         "model_path": args.model_path,
         "load_meta": load_meta,
         "num_layers": num_layers,

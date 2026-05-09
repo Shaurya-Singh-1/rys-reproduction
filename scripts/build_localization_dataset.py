@@ -79,9 +79,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-examples", type=int, default=15)
     parser.add_argument("--scan-limit", type=int, default=200, help="Maximum dataset rows to inspect.")
     parser.add_argument("--instance-id", action="append", default=[], help="Specific instance id. Repeatable.")
-    parser.add_argument("--shuffle", action="store_true", help="Shuffle candidate dataset rows before scanning.")
+    parser.add_argument(
+        "--shuffle",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Shuffle the full dataset before scanning/filtering.",
+    )
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--distractors", type=int, default=3, help="Number of distractor files per example.")
+    parser.add_argument("--distractors", type=int, default=6, help="Number of distractor files per example.")
     parser.add_argument("--snippet-lines", type=int, default=70, help="Maximum lines per snippet.")
     parser.add_argument("--min-snippet-lines", type=int, default=20, help="Minimum useful lines per snippet.")
     parser.add_argument("--max-changed-files", type=int, default=1)
@@ -146,6 +151,24 @@ def parse_changed_files(patch_text: str, *, include_tests: bool) -> list[Changed
         ChangedFile(path=path, old_starts=tuple(starts or [1]))
         for path, starts in files.items()
     ]
+
+
+def extract_file_patch(patch_text: str, target_path: str) -> str:
+    """Return the diff block for one target file from a unified patch."""
+    lines = patch_text.splitlines()
+    selected: list[str] = []
+    in_target = False
+
+    for line in lines:
+        header = DIFF_HEADER_RE.match(line)
+        if header:
+            if in_target and selected:
+                break
+            in_target = header.group(2) == target_path
+        if in_target:
+            selected.append(line)
+
+    return "\n".join(selected)
 
 
 def repo_dir_for(cache_root: Path, repo: str) -> Path:
@@ -270,6 +293,7 @@ def build_example(
         return None, f"patch changes {len(changed)} source files"
 
     correct = changed[0]
+    true_edit = extract_file_patch(patch, correct.path)
     repo = str(sample["repo"])
     base_commit = str(sample["base_commit"])
     repo_dir = ensure_repo(repo, base_commit, repo_cache, redo=redo_repos)
@@ -331,11 +355,15 @@ def build_example(
         "bug_report": str(sample.get("problem_statement", "")),
         "candidate_files": candidate_files,
         "ground_truth": correct.path,
+        "true_edit": true_edit,
         "metadata": {
             "source_dataset": "SWE-bench",
             "changed_files_from_patch": [item.path for item in changed],
             "patch_hunk_starts": list(correct.old_starts),
-            "construction_note": "Gold patch used only to identify ground-truth file and snippet location.",
+            "construction_note": (
+                "Gold patch/true_edit is included for human review and must not be "
+                "shown to the model during localization evaluation."
+            ),
         },
     }, "ok"
 
@@ -348,9 +376,10 @@ def load_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
         wanted = set(args.instance_id)
         rows = [dict(row) for row in rows if str(row.get("instance_id")) in wanted]
     else:
-        rows = [dict(row) for row in rows[: args.scan_limit]]
+        rows = [dict(row) for row in rows]
         if args.shuffle:
             random.Random(args.seed).shuffle(rows)
+        rows = rows[: args.scan_limit]
     return rows
 
 

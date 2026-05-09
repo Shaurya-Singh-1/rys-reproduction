@@ -1,4 +1,7 @@
 .venv/
+.builder-venv/
+.dataset_venv/
+.uv-cache/
 __pycache__/
 *.pyc
 *.pyo
