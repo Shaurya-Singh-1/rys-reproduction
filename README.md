@@ -1,11 +1,28 @@
 # RYS
 
-RYS is a small reproducibility repo for relayering experiments on decoder LLMs.
+RYS is a reproducibility repo for **relayering** experiments on decoder LLMs.
 
-This Desktop build keeps the public RYS workflow intact and adds two practical extensions:
+This `buglocalization` branch keeps the core scan/export workflow and adds the most practical downstream experiment in the repo:
 
-- a plain Hugging Face combined worker for CPU/GPU validation without ExLlama
-- a small software-agent evaluation scaffold for the course-project follow-up
+- a **fault-localization evaluation** that can run locally with a standard Hugging Face model
+- a packaged localization dataset with candidate file snippets
+- a one-command smoke runner for baseline-vs-RYS local evaluation
+
+If you only need one command to verify this branch, use:
+
+```bash
+bash scripts/run_buglocalization_smoke.sh /path/to/local-hf-model
+```
+
+That command:
+
+1. installs/syncs dependencies with `uv`
+2. runs the localization unit tests
+3. executes a tiny two-example localization comparison using baseline and one RYS block
+
+For the full localization instructions, see:
+
+- `docs/buglocalization_runbook.md`
 
 The core idea is simple: duplicate part of a model's existing layer path without changing any weights.
 A standard single-block configuration is written as `(i, j)`:
@@ -24,6 +41,7 @@ This repo contains the pieces needed to reproduce the main experimental workflow
 - XGBoost surrogate pipeline
 - model exporter for writing relayered Hugging Face checkpoints
 - heatmap and balanced Math+EQ analysis code
+- a local fault-localization evaluation path
 
 It does not include the private historical runs, blog drafts, ad hoc notebooks, or dataset generation/calibration code.
 
@@ -47,16 +65,65 @@ It does not include the private historical runs, blog drafts, ad hoc notebooks, 
   - balanced Math+EQ analysis
   - heatmap helpers
   - surrogate utilities
+- `src/agent_eval/localization.py`
+  - prompt construction, ranking parser, and metrics for fault localization
 - `scripts/`
   - sweep setup
   - ExLlama workers
   - beam search
   - surrogate pipeline
   - repeat-sweep helpers
+  - localization dataset builder and local evaluator
 - `hf_export/`
   - checkpoint export
   - HF upload helper
   - Colab notebook
+
+## Branch Focus: Local Bug Localization
+
+The localization branch is the easiest downstream path to run on a normal workstation.
+
+Instead of full repository repair, each example asks the model to:
+
+- read a bug report
+- inspect a short list of candidate source files
+- rank the files by likelihood of containing the root cause
+
+The shipped dataset is:
+
+- `datasets/localization_dataset.json`
+
+and the summary metadata is:
+
+- `datasets/localization_dataset.json.summary.json`
+
+At the current branch tip, the packaged dataset contains `13` examples.
+
+The main entrypoint is:
+
+```bash
+uv run python scripts/run_localization_eval.py \
+  --dataset datasets/localization_dataset.json \
+  --model-path /path/to/local-hf-model \
+  --output-dir results/localization_eval \
+  --limit-examples 4 \
+  --block 16,20 \
+  --dtype bfloat16 \
+  --device-map auto
+```
+
+It writes:
+
+- `run_manifest.json`
+- `records.jsonl`
+- `summary.json`
+
+with the main metrics:
+
+- `top1_accuracy`
+- `top3_accuracy`
+- `mrr`
+- `avg_rank`
 
 ## Probe Sets
 
@@ -93,6 +160,8 @@ Set:
 export EXLLAMAV3_PATH=/path/to/exllamav3
 ```
 
+For the localization branch, you do **not** need ExLlama just to run the local downstream evaluator. A normal Hugging Face causal LM is enough.
+
 ## Local Smoke Demo
 
 If you want to validate the end-to-end pipeline on a normal laptop, run:
@@ -110,6 +179,38 @@ This builds a tiny local Llama fixture, runs a full six-layer `(i, j)` sweep wit
 - `results/smoke/analysis/`
 
 The smoke run is only for reproducibility plumbing, not scientific quality. For meaningful RYS results, switch to a real model and the public probe sets.
+
+## Localization Smoke Run
+
+For the localizable downstream experiment on this branch, run:
+
+```bash
+bash scripts/run_buglocalization_smoke.sh /path/to/local-hf-model
+```
+
+Useful overrides:
+
+```bash
+OUT=results/localization_demo \
+NUM_EXAMPLES=4 \
+BLOCK=16,20 \
+DEVICE_MAP=auto \
+DTYPE=bfloat16 \
+bash scripts/run_buglocalization_smoke.sh /path/to/local-hf-model
+```
+
+Recommended local model sizes:
+
+- easiest on consumer hardware: `Qwen/Qwen2.5-3B-Instruct`
+- stronger local option: `Qwen/Qwen2.5-7B-Instruct`
+
+The smoke script first verifies the parsing/scoring logic with:
+
+```bash
+uv run pytest tests/test_localization_eval.py -q
+```
+
+then launches the actual evaluator.
 
 ## Quick Start
 
