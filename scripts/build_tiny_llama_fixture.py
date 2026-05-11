@@ -22,6 +22,7 @@ def main() -> None:
     parser.add_argument("--intermediate-size", type=int, default=128)
     parser.add_argument("--num-heads", type=int, default=4)
     parser.add_argument("--num-kv-heads", type=int, default=4)
+    parser.add_argument("--max-position-embeddings", type=int, default=8192)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
@@ -39,7 +40,7 @@ def main() -> None:
         num_hidden_layers=args.num_layers,
         num_attention_heads=args.num_heads,
         num_key_value_heads=args.num_kv_heads,
-        max_position_embeddings=1024,
+        max_position_embeddings=args.max_position_embeddings,
         bos_token_id=tokenizer.bos_token_id,
         eos_token_id=tokenizer.eos_token_id,
         pad_token_id=tokenizer.pad_token_id,
