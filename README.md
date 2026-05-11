@@ -8,17 +8,18 @@ This `buglocalization` branch keeps the core scan/export workflow and adds the m
 - a packaged localization dataset with candidate file snippets
 - a one-command smoke runner for baseline-vs-RYS local evaluation
 
-If you only need one command to verify this branch, use:
+If you only need one command to verify this repo on a fresh machine, use:
 
 ```bash
-bash scripts/run_buglocalization_smoke.sh /path/to/local-hf-model
+bash scripts/run_buglocalization_smoke.sh --tiny-fixture
 ```
 
 That command:
 
 1. installs/syncs dependencies with `uv`
-2. runs the localization unit tests
-3. executes a tiny two-example localization comparison using baseline and one RYS block
+2. builds a tiny local Llama fixture
+3. runs the localization unit tests
+4. executes a tiny two-example localization comparison using baseline and one RYS block
 
 For the full localization instructions, see:
 
@@ -185,7 +186,7 @@ The smoke run is only for reproducibility plumbing, not scientific quality. For 
 For the localizable downstream experiment on this branch, run:
 
 ```bash
-bash scripts/run_buglocalization_smoke.sh /path/to/local-hf-model
+bash scripts/run_buglocalization_smoke.sh --tiny-fixture
 ```
 
 Useful overrides:
@@ -194,13 +195,14 @@ Useful overrides:
 OUT=results/localization_demo \
 NUM_EXAMPLES=4 \
 BLOCK=16,20 \
-DEVICE_MAP=auto \
-DTYPE=bfloat16 \
-bash scripts/run_buglocalization_smoke.sh /path/to/local-hf-model
+DEVICE_MAP=cpu \
+DTYPE=float32 \
+bash scripts/run_buglocalization_smoke.sh --tiny-fixture
 ```
 
 Recommended local model sizes:
 
+- zero-setup smoke verification: the built-in tiny fixture
 - easiest on consumer hardware: `Qwen/Qwen2.5-3B-Instruct`
 - stronger local option: `Qwen/Qwen2.5-7B-Instruct`
 
@@ -211,6 +213,12 @@ uv run pytest tests/test_localization_eval.py -q
 ```
 
 then launches the actual evaluator.
+
+If you already have a real local model, you can pass it directly instead:
+
+```bash
+bash scripts/run_buglocalization_smoke.sh /path/to/local-hf-model
+```
 
 ## Quick Start
 

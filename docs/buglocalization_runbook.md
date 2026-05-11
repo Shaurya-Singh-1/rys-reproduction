@@ -45,14 +45,15 @@ The evaluator accepts either:
 From the repo root:
 
 ```bash
-bash scripts/run_buglocalization_smoke.sh /path/to/local-hf-model
+bash scripts/run_buglocalization_smoke.sh --tiny-fixture
 ```
 
 This does three things:
 
 1. `uv sync`
-2. runs `tests/test_localization_eval.py`
-3. evaluates a tiny two-example baseline-vs-RYS smoke run
+2. builds a tiny local Llama fixture
+3. runs `tests/test_localization_eval.py`
+4. evaluates a tiny two-example baseline-vs-RYS smoke run
 
 ## Useful overrides
 
@@ -60,8 +61,14 @@ This does three things:
 OUT=results/localization_demo \
 NUM_EXAMPLES=4 \
 BLOCK=16,20 \
-DEVICE_MAP=auto \
-DTYPE=bfloat16 \
+DEVICE_MAP=cpu \
+DTYPE=float32 \
+bash scripts/run_buglocalization_smoke.sh --tiny-fixture
+```
+
+If you already have a real local model:
+
+```bash
 bash scripts/run_buglocalization_smoke.sh /path/to/local-hf-model
 ```
 
